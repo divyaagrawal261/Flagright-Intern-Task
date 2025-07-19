@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
@@ -8,10 +9,10 @@ const Navbar = () => {
             <img src="https://cdn.prod.website-files.com/64f420094266acf96b6d3f84/64f4202e5cb2cbb8378b2092_logo-dark.svg" className='max-h-[28px]' alt="" />
         </div>
         <ul className="navbar__links flex gap-4">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#about">Users</a></li>
-            <li><a href="#services">Transactions</a></li>
-            <li><a href="#contact">Relationships</a></li>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/users">Users</Link></li>
+            <li><Link to="/transactions">Transactions</Link></li>
+            <li><Link to="/relationships">Relationships</Link></li>
         </ul>
     </nav>    ) 
 }

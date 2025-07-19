@@ -5,6 +5,10 @@ import './App.css'
 import Navbar from './components/Navbar.jsx'
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 import Home from './pages/Home.jsx'
+import Users from './pages/Users.jsx'
+import { ToastContainer } from 'react-toastify'
+// import Transactions from './pages/Transactions.jsx'
+// import Relationships from './pages/Relationships.jsx'
 
 function App() {
   return (  
@@ -12,7 +16,11 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/users" element={<Users/>} />
+        {/* <Route path="/transactions" element={<Transactions />} /> */}
+        {/* <Route path="/relationships" element={<Relationships />} /> */}
       </Routes>
+      <ToastContainer/>
     </Router>
   )
 }
