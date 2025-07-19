@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Buttons from '../components/Button.jsx';
-import { addUser } from '../apis/Users.js';
+import { addUser , listAllUsers} from '../apis/Users.js';
 import { toast } from 'react-toastify';
+import UserCard from '../components/UserCard.jsx';
 
 const Users = () => {
     const [showModal, setShowModal] = useState(false);
@@ -11,6 +12,7 @@ const Users = () => {
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
     const [paymentMethods, setPaymentMethods] = useState('');
+    const [users, setUsers] = useState([]);
 
     const handleAddUser = () => {
         setShowModal(true);
@@ -31,15 +33,16 @@ const Users = () => {
             address,
             payment_methods: paymentMethods
         });
-        toast(`User ${firstName + " " + lastName} added successfully!`);
-        console.log("User added:", user);
+        toast.success(`User ${firstName + " " + lastName} added successfully!`);
         }
         catch(error)
         {
+            toast.error("Failed to add user");
             console.error("Error adding user:", error);
         }
         finally {
             setShowModal(false);
+            listUsers();
             setFirstName('');
             setLastName('');
             setEmail('');
@@ -49,11 +52,28 @@ const Users = () => {
         }
     }
 
+    const listUsers  = async () =>{
+        try{
+            const data = await listAllUsers();
+            console.log("Fetched users:", data);
+            // toast.success("Users fetched successfully!");
+            setUsers(data);
+        }
+        catch(error)
+        {
+            toast.error("Failed to fetch users");
+            console.error("Error fetching users:", error);
+        }
+    }
+
+    useEffect(()=>{
+        listUsers();
+    }, []);
     return (
         <>
             <div className='flex flex-col p-4 justify-center my-10'>
                 <h1 className='text-white text-5xl font-bold mb-4'>Users Page</h1>
-                <p className='text-2xl text-white'>Visualizing user connections had never been easier.</p>
+                <p className='text-2xl text-white'>Visualizing user connections had never been easier. Below is the list of all the users present in our database. Add a new User or view, update or visualize the relationships of existing users with a just a click!</p>
             </div>
             <div className='p-4'>
                 <Buttons text={"Add User"} onClick={handleAddUser} />
@@ -105,6 +125,14 @@ const Users = () => {
                     </div>
                 </div>
             )}
+            <div className='p-4'>
+                <h2 className='text-lg font-semibold'>User List</h2>
+                <div className='mt-4 gap-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+                    {users.map(user => (
+                        <UserCard key={user.id} user={user} />
+                    ))}
+                </div>
+            </div>
         </>
     );
 }
