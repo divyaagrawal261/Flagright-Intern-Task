@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Buttons from '../components/Button.jsx';
-import { addUser , listAllUsers} from '../apis/Users.js';
+import { addUser, listAllUsers } from '../apis/Users.js';
 import { toast } from 'react-toastify';
 import UserCard from '../components/UserCard.jsx';
 
@@ -13,6 +13,8 @@ const Users = () => {
     const [address, setAddress] = useState('');
     const [paymentMethods, setPaymentMethods] = useState('');
     const [users, setUsers] = useState([]);
+    const [tempUsers, setTempUsers] = useState([]);
+    const [searchWords, setSearchWords] = useState('');
 
     const handleAddUser = () => {
         setShowModal(true);
@@ -22,21 +24,20 @@ const Users = () => {
         setShowModal(false);
     };
 
-    const handleSubmit = async (e) =>{
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        try{
-        const user = await addUser({
-            firstName,
-            lastName,
-            email,
-            phone,
-            address,
-            payment_methods: paymentMethods
-        });
-        toast.success(`User ${firstName + " " + lastName} added successfully!`);
+        try {
+            const user = await addUser({
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                payment_methods: paymentMethods
+            });
+            toast.success(`User ${firstName + " " + lastName} added successfully!`);
         }
-        catch(error)
-        {
+        catch (error) {
             toast.error("Failed to add user");
             console.error("Error adding user:", error);
         }
@@ -52,23 +53,41 @@ const Users = () => {
         }
     }
 
-    const listUsers  = async () =>{
-        try{
+    const listUsers = async () => {
+        try {
             const data = await listAllUsers();
             console.log("Fetched users:", data);
-            // toast.success("Users fetched successfully!");
+            toast.success("Users fetched successfully!");
             setUsers(data);
+            setTempUsers(data);
         }
-        catch(error)
-        {
+        catch (error) {
             toast.error("Failed to fetch users");
             console.error("Error fetching users:", error);
         }
     }
 
-    useEffect(()=>{
+    const handleSearch = () => {
+        const target = (searchWords.trim()).toLowerCase();
+        const filteredUsers = tempUsers.filter(user => {
+            return user.name.toLowerCase().includes(target) ||
+                user.email.toLowerCase().includes(target) || user.phone.includes(target) ||
+                user.address.toLowerCase().includes(target) ||
+                user.payment_methods.toLowerCase().includes(target);
+        });
+        setUsers(filteredUsers);
+        console.log("Filtered users:", filteredUsers);
+    }
+
+    useEffect(() => {
         listUsers();
     }, []);
+
+    const handleReset = () => {
+        setUsers(tempUsers);
+        setSearchWords("");
+    };
+
     return (
         <>
             <div className='flex flex-col p-4 justify-center my-10'>
@@ -78,35 +97,46 @@ const Users = () => {
             <div className='p-4'>
                 <Buttons text={"Add User"} onClick={handleAddUser} />
             </div>
+            <div className='flex flex-col p-4 gap-4 sticky top-0 z-10 bg-black'>
+                <div className='flex gap-2'>
+                    <input type="search" name="search" id="search" placeholder="Search users..." value={searchWords} className='md:w-1/2 w-full box-border text-white p-2 border border-gray-300 rounded focus:outline-0 bg-black' onChange={(e) => {
+                        setSearchWords(e.target.value)
+                        handleSearch();
+                    }} />
+                    {/* <Buttons text={"Search"} onClick={handleSearch} /> */}
+                    <Buttons text={"Reset"} onClick={handleReset} disabled={users == tempUsers} />
+                </div>
+                <h2 className='text-lg font-semibold text-white'>Users List</h2>
+            </div>
             {showModal && (
-                <div className='fixed inset-0 flex items-center justify-center backdrop-blur-sm'>
+                <div className='fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50'>
                     <div className='bg-white p-4 rounded shadow-md flex flex-col'>
                         <div className="flex justify-between">
                             <h2 className='text-lg font-bold mb-2'>Add User</h2>
-                            <Buttons text={"X"} onClick={handleCloseModal} className={"bg-black"}/>
+                            <Buttons text={"X"} onClick={handleCloseModal} className={"bg-black"} />
                         </div>
                         <form className="max-w-md mx-auto flex flex-col">
                             <div className="relative z-0 w-full mb-5 group">
-                                <input type="email" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setEmail(e.target.value)}/>
+                                <input type="email" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setEmail(e.target.value)} />
                                 <label for="floating_email" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
                             </div>
                             <div className="grid md:grid-cols-2 md:gap-6">
                                 <div className="relative z-0 w-full mb-5 group">
-                                    <input type="text" name="floating_first_name" id="floating_first_name" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setFirstName(e.target.value)}/>
+                                    <input type="text" name="floating_first_name" id="floating_first_name" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setFirstName(e.target.value)} />
                                     <label for="floating_first_name" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">First name</label>
                                 </div>
                                 <div className="relative z-0 w-full mb-5 group">
-                                    <input type="text" name="floating_last_name" id="floating_last_name" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setLastName(e.target.value)}/>
+                                    <input type="text" name="floating_last_name" id="floating_last_name" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setLastName(e.target.value)} />
                                     <label for="floating_last_name" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Last name</label>
                                 </div>
                             </div>
                             <div className="grid md:grid-cols-2 md:gap-6">
                                 <div className="relative z-0 w-full mb-5 group">
-                                    <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" name="floating_phone" id="floating_phone" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setPhone(e.target.value)}/>
+                                    <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" name="floating_phone" id="floating_phone" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setPhone(e.target.value)} />
                                     <label for="floating_phone" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Phone number</label>
                                 </div>
                                 <div className="relative z-0 w-full mb-5 group">
-                                    <input type="text" name="floating_company" id="floating_company" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setAddress(e.target.value)}/>
+                                    <input type="text" name="floating_company" id="floating_company" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required onChange={(e) => setAddress(e.target.value)} />
                                     <label for="floating_company" className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Address</label>
                                 </div>
                                 <div className="relative z-0 w-full mb-5 group">
@@ -126,8 +156,7 @@ const Users = () => {
                 </div>
             )}
             <div className='p-4'>
-                <h2 className='text-lg font-semibold'>User List</h2>
-                <div className='mt-4 gap-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+                <div className='mt-4 gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
                     {users.map(user => (
                         <UserCard key={user.id} user={user} />
                     ))}

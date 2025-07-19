@@ -47,7 +47,7 @@ function UserCard({ user }) {
   return (
     <>
     {showModal && (
-                    <div className='fixed inset-0 flex items-center justify-center backdrop-blur-sm'>
+                    <div className='fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50'>
                         <div className='bg-white p-4 rounded shadow-md flex flex-col'>
                             <div className="flex justify-between">
                                 <h2 className='text-lg font-bold mb-2'>Update User</h2>
