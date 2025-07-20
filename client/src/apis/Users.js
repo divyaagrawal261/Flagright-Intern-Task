@@ -33,6 +33,7 @@ export const listAllUsers = async () =>{
 }
 
 export const updateUser = async ({id, firstName, lastName, email, phone, address, payment_methods}) => {
+    console.log({id, firstName, lastName, address, phone, payment_methods, email});
     const response = await fetch(`${baseUrl}/users/`, {
         method: 'POST',
         headers: {
