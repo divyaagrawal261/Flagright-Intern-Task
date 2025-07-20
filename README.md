@@ -51,6 +51,8 @@ git clone https://github.com/divyaagrawal261/Flagright-Intern-Task.git
 cd Flagright-Intern-Task
 ```
 
+---
+
 ## 🛠 Required Environment Files
 
 Create a `.env` file inside both the `backend/` and `client/` directories:
@@ -67,7 +69,25 @@ NEO4J_PASSWORD=flagright
 VITE_API_URL=http://localhost:5000
 ```
 
-### 2. Run the entire stack with Docker Compose
+---
+
+## 📦 Install Dependencies
+
+Before starting Docker Compose, make sure to install project dependencies locally:
+
+```bash
+cd backend
+npm install
+
+cd ../client
+npm install
+```
+
+---
+
+## 🚀 Run the Full Stack (Neo4j + Backend + Frontend)
+
+Return to the root directory and run:
 
 ```bash
 docker-compose up --build
@@ -86,24 +106,24 @@ This will:
 
 ## 📬 API Endpoints
 
-| Route                            | Method | Description                          |
+| Route                             | Method | Description                          |
 |----------------------------------|--------|--------------------------------------|
-| `/user`                         | POST   | Add/update user                      |
-| `/relationships/user/:id`       | GET    | Get all relationships of a user      |
-| `/transaction`                  | POST   | Create/Update a transaction          |
-| `/transaction`                  | GET    | List all transactions with details   |
-| `/user`                         | GET    | List all users                       |
-| `/relationships/transaction/:id`| GET    | Get all relationships of a transaction |
+| `/user`                          | POST   | Add/update user                      |
+| `/relationships/user/:id`        | GET    | Get all relationships of a user      |
+| `/transaction`                   | POST   | Create/Update a transaction          |
+| `/transaction`                   | GET    | List all transactions with details   |
+| `/user`                          | GET    | List all users                       |
+| `/relationships/transaction/:id` | GET    | Get all relationships of a transaction |
 
 ---
 
 ## 👁 Access Services
 
-| Service     | URL                          |
-|-------------|------------------------------|
-| Frontend    | http://localhost:5173         |
-| Backend API | http://localhost:5000         |
-| Neo4j UI    | http://localhost:7474         |
+| Service     | URL                    |
+|-------------|------------------------|
+| Frontend    | http://localhost:5173  |
+| Backend API | http://localhost:5000  |
+| Neo4j UI    | http://localhost:7474  |
 
 > Neo4j Login:  
 > Username: `neo4j`  
