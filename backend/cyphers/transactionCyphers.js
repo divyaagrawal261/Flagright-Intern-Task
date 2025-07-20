@@ -6,4 +6,4 @@ export const linkReceiverToTransactionQuery = `MATCH (u:User {id: $receiverId}),
 
 export const linkRelatedTransactionsQuery = `MATCH (t1:Transaction), (t2:Transaction) WHERE t1.id <> t2.id AND (t1.ip = t2.ip OR t1.deviceId = t2.deviceId) MERGE (t1)-[:RELATED_TO]->(t2) MERGE (t2)-[:RELATED_TO]->(t1)`;
 
-export const listAllTransactionsQuery =`MATCH (t:Transactions) RETURN t`;
+export const listAllTransactionsQuery =`MATCH (t:Transaction) RETURN t`;
