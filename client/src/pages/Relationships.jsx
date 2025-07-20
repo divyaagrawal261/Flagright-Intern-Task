@@ -2,18 +2,26 @@ import React, { useEffect, useRef, useState } from "react";
 import cytoscape from "cytoscape";
 import { useParams } from "react-router-dom";
 import { getUserRelations } from '../apis/Users';
+import { getTransactionRelationship } from '../apis/Transactions';
 
 
 const Relationships = () => {
-  const { userId } = useParams();
+  const params = useParams();
+  let userId, transactionId;
+  if (window.location.pathname.includes('/user/')) {
+    userId = params.userId;
+    transactionId = undefined;
+  } else if (window.location.pathname.includes('/transaction/')) {
+    transactionId = params.transactionId;
+    console.log(transactionId)
+    userId = undefined;
+  }
   const cyRef = useRef(null);
   const containerRef = useRef(null);
   const [elements, setElements] = useState([]);
 
-  // Helper to create a node with unique id and label
   const makeNode = (id, label, type = 'user') => ({ data: { id, label, type } });
 
-  // Transform API data to Cytoscape elements
   const transformRelationsToElements = (relations) => {
     const nodesMap = new Map();
     const edges = [];
@@ -24,44 +32,47 @@ const Relationships = () => {
       let sourceId, targetId, sourceLabel, targetLabel, sourceType = 'user', targetType = 'user';
 
       if (relationship === 'SHARED_ATTRIBUTE') {
-        // Both source and target are users
         sourceId = source.id || source.email || JSON.stringify(source);
         targetId = target.id || target.email || JSON.stringify(target);
         sourceLabel = source.name || source.email || 'User';
         targetLabel = target.name || target.email || 'User';
-        sourceType = targetType = 'user';
-      } else if (relationship === 'CREDIT' || relationship === 'DEBIT') {
-        // User and Transaction
-        sourceId = source.id || source.email || JSON.stringify(source);
-        targetId = target.id || target.transaction_id || JSON.stringify(target);
-        sourceLabel = source.name || source.email || 'User';
-        targetLabel = `IP: ${target.ip || '-'} \n Amt: ${target.amount || '-'} \n User: ${sourceLabel}`;
         sourceType = 'user';
-        targetType = 'transaction';
+        targetType = 'user';
+      } else if (relationship === 'CREDIT' || relationship === 'DEBIT') {
+        if (source.amount && source.ip) {
+          sourceId = source.id || source.transaction_id || JSON.stringify(source);
+          targetId = target.id || target.email || JSON.stringify(target);
+          sourceLabel = `IP: ${source.ip || '-'}\nAmt: ${source.amount || '-'}\nDevice: ${source.deviceId || '-'}`;
+          targetLabel = target.name || target.email || 'User';
+          sourceType = 'transaction';
+          targetType = 'user';
+        } else {
+          sourceId = source.id || source.email || JSON.stringify(source);
+          targetId = target.id || target.transaction_id || JSON.stringify(target);
+          sourceLabel = source.name || source.email || 'User';
+          targetLabel = `IP: ${target.ip || '-'}\nAmt: ${target.amount || '-'}\nDevice: ${target.deviceId || '-'}`;
+          sourceType = 'user';
+          targetType = 'transaction';
+        }
       } else if (relationship === 'RELATED_TO') {
-        // Transaction to Transaction
         sourceId = source.id || source.transaction_id || JSON.stringify(source);
         targetId = target.id || target.transaction_id || JSON.stringify(target);
         sourceLabel = `IP: ${source.ip || '-'}\nAmt: ${source.amount || '-'}`;
         targetLabel = `IP: ${target.ip || '-'}\nAmt: ${target.amount || '-'}`;
         sourceType = targetType = 'transaction';
       } else {
-        // fallback
         sourceId = source.id || JSON.stringify(source);
         targetId = target.id || JSON.stringify(target);
         sourceLabel = source.name || 'Node';
         targetLabel = target.name || 'Node';
       }
 
-      // Add nodes if not already present
       if (!nodesMap.has(sourceId)) nodesMap.set(sourceId, makeNode(sourceId, sourceLabel, sourceType));
       if (!nodesMap.has(targetId)) nodesMap.set(targetId, makeNode(targetId, targetLabel, targetType));
 
-      // Add edges, avoid duplicates
       const edgeKey = (a, b, rel) => `${a}|${b}|${rel}`;
       const relType = String(relationship).trim();
       if (relType === 'SHARED_ATTRIBUTE' || relType === 'RELATED_TO') {
-        // Add bidirectional edges if not already present
         const key1 = edgeKey(sourceId, targetId, relType);
         const key2 = edgeKey(targetId, sourceId, relType);
         if (!edgeSet.has(key1)) {
@@ -73,7 +84,6 @@ const Relationships = () => {
           edgeSet.add(key2);
         }
       } else {
-        // Unidirectional edge
         const key = edgeKey(sourceId, targetId, relType);
         if (!edgeSet.has(key)) {
           edges.push({ data: { source: sourceId, target: targetId, label: relType, relationshipType: relType } });
@@ -86,21 +96,24 @@ const Relationships = () => {
   };
 
   useEffect(() => {
-    // Fetch user relations when userId changes
     const fetchData = async () => {
-      if (!userId) return;
       try {
-        const data = await getUserRelations({ id: userId });
+        let data = [];
+        if (userId) {
+          data = await getUserRelations({ id: userId });
+        } else if (transactionId) {
+          data = await getTransactionRelationship({ id: transactionId });
+          console.log(data);
+        }
         const elements = transformRelationsToElements(data);
         setElements(elements);
       } catch (error) {
         setElements([]);
-        // Optionally, show an error message
-        // toast.error('Failed to fetch user relations');
+        toast.error('Failed to fetch relations');
       }
     };
     fetchData();
-  }, [userId]);
+  }, [params]);
 
   useEffect(() => {
     if (containerRef.current && elements.length > 0) {
@@ -111,7 +124,6 @@ const Relationships = () => {
         container: containerRef.current,
         elements: elements,
         style: [
-          // User node
           {
             selector: 'node[type = "user"]',
             style: {
@@ -130,7 +142,6 @@ const Relationships = () => {
               'text-max-width': 120,
             }
           },
-          // Transaction node
           {
             selector: 'node[type = "transaction"]',
             style: {
@@ -149,7 +160,6 @@ const Relationships = () => {
               'text-max-width': 120,
             }
           },
-          // SHARED_ATTRIBUTE edge
           {
             selector: 'edge[relationshipType = "SHARED_ATTRIBUTE"]',
             style: {
@@ -163,7 +173,6 @@ const Relationships = () => {
               'color': '#333',
             }
           },
-          // CREDIT edge
           {
             selector: 'edge[relationshipType = "CREDIT"]',
             style: {
@@ -177,7 +186,6 @@ const Relationships = () => {
               'color': '#333',
             }
           },
-          // DEBIT edge
           {
             selector: 'edge[relationshipType = "DEBIT"]',
             style: {
@@ -191,7 +199,6 @@ const Relationships = () => {
               'color': '#333',
             }
           },
-          // RELATED_TO edge
           {
             selector: 'edge[relationshipType = "RELATED_TO"]',
             style: {
@@ -205,7 +212,6 @@ const Relationships = () => {
               'color': '#333',
             }
           },
-          // fallback edge
           {
             selector: 'edge',
             style: {
@@ -238,7 +244,6 @@ const Relationships = () => {
       <div className="w-full max-w-4xl bg-black rounded shadow p-4">
         <div className="mb-4 text-lg font-semibold text-white">Relationships</div>
         <div ref={containerRef} style={{ width: '100%', height: '500px', background: '#f3f4f6', borderRadius: '8px' }} />
-        {/* Legend Section at the end */}
         <div className="flex flex-row flex-wrap gap-8 mt-6">
           <div className="flex items-center gap-2">
             <span style={{width: 20, height: 20, borderRadius: '50%', background: '#0074D9', display: 'inline-block', border: '2px solid #333'}}></span>

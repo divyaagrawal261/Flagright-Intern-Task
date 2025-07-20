@@ -3,7 +3,7 @@ import { updateTransaction } from "../apis/Transactions";
 import { listAllUsers } from "../apis/Users";
 import { toast } from "react-toastify";
 import Buttons from "./Button";
-
+import { useNavigate } from 'react-router-dom';
 
 const TransactionCard = ({ txn, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
@@ -13,6 +13,7 @@ const TransactionCard = ({ txn, onUpdate }) => {
   const [amount, setAmount] = useState(txn.transaction?.amount || "");
   const [ip, setIp] = useState(txn.transaction?.ip || "");
   const [deviceId, setDeviceId] = useState(txn.transaction?.deviceId || "");
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch users for dropdowns
@@ -94,6 +95,12 @@ const TransactionCard = ({ txn, onUpdate }) => {
           <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" onClick={handleUpdate}>
             Update Amount
           </button>
+          <button
+          className='bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded'
+          onClick={() => navigate(`/relationships/transaction/${txn.transaction.id}`)}
+        >
+          Visualize
+        </button>
         </div>
       </div>
     </>

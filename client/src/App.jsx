@@ -19,7 +19,8 @@ function App() {
         <Route path="/users" element={<Users/>} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/relationships" element={<Relationships />} />
-        <Route path="/relationships/:userId" element={<Relationships />} />
+        <Route path="/relationships/user/:userId" element={<Relationships />} />
+        <Route path="/relationships/transaction/:transactionId" element={<Relationships />} />
       </Routes>
       <ToastContainer/>
     </Router>
