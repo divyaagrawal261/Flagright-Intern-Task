@@ -156,6 +156,14 @@ docker-compose down -v
 
 ---
 
+## Demo Video
+
+Follow this link to view the demo video.
+It covers complete setup using the Readme file and Demo of all the features provided
+[Link](https://youtu.be/DMDzyHnYuvQ)
+
+---
+
 ## 🧠 Maintainer
 
 Made with 💡 by [Divya Agrawal](https://github.com/divyaagrawal261)
