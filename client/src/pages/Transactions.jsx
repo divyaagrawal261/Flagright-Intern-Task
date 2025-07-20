@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Buttons from '../components/Button.jsx';
 import { listAllTransactions, addTransactions } from '../apis/Transactions.js';
+import { listAllUsers } from '../apis/Users.js';
 import { toast } from 'react-toastify';
 import TransactionCard from '../components/TransactionCard.jsx';
 
@@ -14,6 +15,7 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [tempTransactions, setTempTransactions] = useState([]);
   const [searchWords, setSearchWords] = useState('');
+  const [users, setUsers] = useState([]);
 
   const handleAddTransaction = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
@@ -73,6 +75,16 @@ const Transactions = () => {
 
   useEffect(() => {
     listTransactions();
+    // Fetch users for dropdowns
+    const fetchUsers = async () => {
+      try {
+        const data = await listAllUsers();
+        setUsers(data);
+      } catch (error) {
+        toast.error('Failed to fetch users for dropdown');
+      }
+    };
+    fetchUsers();
   }, []);
 
   return (
@@ -93,9 +105,12 @@ const Transactions = () => {
             placeholder='Search transactions...'
             value={searchWords}
             className='md:w-1/2 w-full box-border text-white p-2 border border-gray-300 rounded focus:outline-0 bg-black'
-            onChange={e => setSearchWords(e.target.value)}
+            onChange={e => {
+                setSearchWords(e.target.value);
+                handleSearch();
+            }}
           />
-          <Buttons text={'Search'} onClick={handleSearch} />
+          {/* <Buttons text={'Search'} onClick={handleSearch} /> */}
           <Buttons text={'Reset'} onClick={handleReset} disabled={tempTransactions==transactions}/>
         </div>
         <h2 className='text-lg font-semibold text-white'>Transactions List</h2>
@@ -109,12 +124,36 @@ const Transactions = () => {
             </div>
             <form className='max-w-md mx-auto flex flex-col' onSubmit={handleSubmit}>
               <div className='relative z-0 w-full mb-5 group'>
-                <input type='text' name='senderId' id='senderId' className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer' placeholder=' ' required value={senderId} onChange={e => setSenderId(e.target.value)} />
-                <label htmlFor='senderId' className='peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>Sender ID</label>
+                <select
+                  name='senderId'
+                  id='senderId'
+                  className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'
+                  required
+                  value={senderId}
+                  onChange={e => setSenderId(e.target.value)}
+                >
+                  <option value=''>Select Sender</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
+                <label htmlFor='senderId' className='peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>Sender</label>
               </div>
               <div className='relative z-0 w-full mb-5 group'>
-                <input type='text' name='receiverId' id='receiverId' className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer' placeholder=' ' required value={receiverId} onChange={e => setReceiverId(e.target.value)} />
-                <label htmlFor='receiverId' className='peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>Receiver ID</label>
+                <select
+                  name='receiverId'
+                  id='receiverId'
+                  className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer'
+                  required
+                  value={receiverId}
+                  onChange={e => setReceiverId(e.target.value)}
+                >
+                  <option value=''>Select Receiver</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>{user.name}</option>
+                  ))}
+                </select>
+                <label htmlFor='receiverId' className='peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6'>Receiver</label>
               </div>
               <div className='relative z-0 w-full mb-5 group'>
                 <input type='number' name='amount' id='amount' className='block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer' placeholder=' ' required value={amount} onChange={e => setAmount(e.target.value)} />
