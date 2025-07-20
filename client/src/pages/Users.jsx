@@ -15,6 +15,13 @@ const Users = () => {
     const [users, setUsers] = useState([]);
     const [tempUsers, setTempUsers] = useState([]);
     const [searchWords, setSearchWords] = useState('');
+    const [filterProperties, setFilterProperties] = useState({
+        name: true,
+        email: false,
+        phone: false,
+        address: false,
+        payment_methods: false
+    });
 
     const handleAddUser = () => {
         setShowModal(true);
@@ -69,14 +76,14 @@ const Users = () => {
 
     const handleSearch = () => {
         const target = (searchWords.trim()).toLowerCase();
+        const activeProps = Object.keys(filterProperties).filter(key => filterProperties[key]);
         const filteredUsers = tempUsers.filter(user => {
-            return user.name.toLowerCase().includes(target) ||
-                user.email.toLowerCase().includes(target) || user.phone.includes(target) ||
-                user.address.toLowerCase().includes(target) ||
-                user.payment_methods.toLowerCase().includes(target);
+            return activeProps.some(prop => {
+                if (!user[prop]) return false;
+                return user[prop].toLowerCase().includes(target);
+            });
         });
         setUsers(filteredUsers);
-        console.log("Filtered users:", filteredUsers);
     }
 
     useEffect(() => {
@@ -98,12 +105,24 @@ const Users = () => {
                 <Buttons text={"Add User"} onClick={handleAddUser} />
             </div>
             <div className='flex flex-col p-4 gap-4 sticky top-0 z-10 bg-black'>
-                <div className='flex gap-2'>
+                <div className='flex flex-wrap gap-4 items-center'>
+                    <div className="flex gap-3 items-center">
+                        {Object.entries(filterProperties).map(([key, checked]) => (
+                            <label key={key} className="flex items-center text-white text-sm cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => setFilterProperties(prev => ({ ...prev, [key]: !prev[key] }))}
+                                    className="accent-blue-600 w-4 h-4 mr-1 rounded focus:ring-2 focus:ring-blue-400 border-gray-300 bg-gray-800"
+                                />
+                                {key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </label>
+                        ))}
+                    </div>
                     <input type="search" name="search" id="search" placeholder="Search users..." value={searchWords} className='md:w-1/2 w-full box-border text-white p-2 border border-gray-300 rounded focus:outline-0 bg-black' onChange={(e) => {
                         setSearchWords(e.target.value)
                         handleSearch();
                     }} />
-                    {/* <Buttons text={"Search"} onClick={handleSearch} /> */}
                     <Buttons text={"Reset"} onClick={handleReset} disabled={users == tempUsers} />
                 </div>
                 <h2 className='text-lg font-semibold text-white'>Users List</h2>

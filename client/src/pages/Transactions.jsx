@@ -15,6 +15,19 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [tempTransactions, setTempTransactions] = useState([]);
   const [searchWords, setSearchWords] = useState('');
+  const [filterProperties, setFilterProperties] = useState({
+    sender_name: true,
+    sender_email: false,
+    sender_phone: false,
+    sender_address: false,
+    receiver_name: false,
+    receiver_email: false,
+    receiver_phone: false,
+    receiver_address: false,
+    ip: false,
+    deviceId: false,
+    amount: false
+  });
   const [users, setUsers] = useState([]);
 
   const handleAddTransaction = () => setShowModal(true);
@@ -54,17 +67,37 @@ const Transactions = () => {
 
   const handleSearch = () => {
     const target = searchWords.trim().toLowerCase();
-    const filtered = tempTransactions.filter(txn =>
-      (txn.sender.name && txn.sender.name.toLowerCase().includes(target)) ||
-      (txn.receiver.name && txn.receiver.name.toLowerCase().includes(target)) ||
-      (txn.transaction.ip && txn.transaction.ip.toLowerCase().includes(target)) ||
-      (txn.transaction.deviceId && txn.transaction.deviceId.toLowerCase().includes(target)) ||
-      (txn.sender.email && txn.sender.email.toLowerCase().includes(target)) ||
-      (txn.receiver.email && txn.receiver.email.toLowerCase().includes(target))
-      || (txn.transaction.amount.toLowerCase().includes(target)
-    || (txn.transaction.id.toLowerCase().includes(target)))
-
-    );
+    const activeProps = Object.keys(filterProperties).filter(key => filterProperties[key]);
+    const filtered = tempTransactions.filter(txn => {
+      return activeProps.some(prop => {
+        switch (prop) {
+          case 'sender_name':
+            return txn.sender?.name && txn.sender.name.toLowerCase().includes(target);
+          case 'sender_email':
+            return txn.sender?.email && txn.sender.email.toLowerCase().includes(target);
+          case 'sender_phone':
+            return txn.sender?.phone && txn.sender.phone.toLowerCase().includes(target);
+          case 'sender_address':
+            return txn.sender?.address && txn.sender.address.toLowerCase().includes(target);
+          case 'receiver_name':
+            return txn.receiver?.name && txn.receiver.name.toLowerCase().includes(target);
+          case 'receiver_email':
+            return txn.receiver?.email && txn.receiver.email.toLowerCase().includes(target);
+          case 'receiver_phone':
+            return txn.receiver?.phone && txn.receiver.phone.toLowerCase().includes(target);
+          case 'receiver_address':
+            return txn.receiver?.address && txn.receiver.address.toLowerCase().includes(target);
+          case 'ip':
+            return txn.transaction?.ip && txn.transaction.ip.toLowerCase().includes(target);
+          case 'deviceId':
+            return txn.transaction?.deviceId && txn.transaction.deviceId.toLowerCase().includes(target);
+          case 'amount':
+            return txn.transaction?.amount && txn.transaction.amount.toString().toLowerCase().includes(target);
+          default:
+            return false;
+        }
+      });
+    });
     setTransactions(filtered);
   };
 
@@ -97,7 +130,20 @@ const Transactions = () => {
         <Buttons text={'Add Transaction'} onClick={handleAddTransaction} />
       </div>
       <div className='flex flex-col p-4 gap-4 sticky top-0 z-10 bg-black'>
-        <div className='flex gap-2'>
+        <div className='flex flex-wrap gap-4 items-center'>
+          <div className="flex flex-wrap gap-3 items-center">
+            {Object.entries(filterProperties).map(([key, checked]) => (
+              <label key={key} className="flex items-center text-white text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => setFilterProperties(prev => ({ ...prev, [key]: !prev[key] }))}
+                  className="accent-blue-600 w-4 h-4 mr-1 rounded focus:ring-2 focus:ring-blue-400 border-gray-300 bg-gray-800"
+                />
+                {key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </label>
+            ))}
+          </div>
           <input
             type='search'
             name='search'
@@ -110,7 +156,6 @@ const Transactions = () => {
                 handleSearch();
             }}
           />
-          {/* <Buttons text={'Search'} onClick={handleSearch} /> */}
           <Buttons text={'Reset'} onClick={handleReset} disabled={tempTransactions==transactions}/>
         </div>
         <h2 className='text-lg font-semibold text-white'>Transactions List</h2>
