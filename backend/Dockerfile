@@ -1,5 +1,13 @@
-FROM neo4j:latest
+FROM node:20
 
-ENV NEO4J_AUTH=neo4j/flagright
+WORKDIR /usr/src/app
 
-EXPOSE 7474 7687
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 5000
+
+CMD ["sh", "-c", "node seed.js && npm run dev"]
+
