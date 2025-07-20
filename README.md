@@ -51,6 +51,22 @@ git clone https://github.com/divyaagrawal261/Flagright-Intern-Task.git
 cd Flagright-Intern-Task
 ```
 
+## 🛠 Required Environment Files
+
+Create a `.env` file inside both the `backend/` and `client/` directories:
+
+### 🔹 `backend/.env`
+```env
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=flagright
+```
+
+### 🔹 `client/.env`
+```env
+VITE_API_URL=http://localhost:5000
+```
+
 ### 2. Run the entire stack with Docker Compose
 
 ```bash
@@ -77,7 +93,7 @@ This will:
 | `/transaction`                  | POST   | Create/Update a transaction          |
 | `/transaction`                  | GET    | List all transactions with details   |
 | `/user`                         | GET    | List all users                       |
-| `/relationships/transaction/id` | GET    | Get all relationships of a transaction |
+| `/relationships/transaction/:id`| GET    | Get all relationships of a transaction |
 
 ---
 
