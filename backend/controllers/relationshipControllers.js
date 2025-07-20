@@ -1,6 +1,7 @@
 import {transactionRelationshipCypher, userRelationshipCypher} from "../cyphers/relationshipCypher.js";
 
-export async function getUserRelationships(session, req, res){
+export async function getUserRelationships(driver, req, res){
+    const session = driver.session();
     const {id} = req.params;
     try {
         console.log("Requested to get user relationships for ID:", id);
@@ -16,9 +17,13 @@ console.log("User relationships:", relationships);
         console.error(err);
         res.status(500).json({ error: 'Error fetching user relationships' });
     }
+    finally{
+        await session.close();
+    }
 }
 
-export async function getTransactionRelationships(session, req, res){
+export async function getTransactionRelationships(driver, req, res){
+    const session = driver.session();
     const {id} = req.params;
     try {
         console.log("Requested to get transaction relationships for ID:", id);
@@ -34,5 +39,8 @@ export async function getTransactionRelationships(session, req, res){
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error fetching transaction relationships' });
+    }
+    finally{
+        await session.close();
     }
 }

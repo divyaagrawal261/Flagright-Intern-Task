@@ -20,11 +20,11 @@ const driver = neo4j.driver(
   )
 );
 
-const session = driver.session();
+// const session = driver.session();
 
-app.use('/users', userRoutes(session));
-app.use('/transactions', transactionRoutes(session));
-app.use('/relationships', relationshipRoutes(session));
+app.use('/users', userRoutes(driver));
+app.use('/transactions', transactionRoutes(driver));
+app.use('/relationships', relationshipRoutes(driver));
 app.listen(5000, () => console.log('Backend running on port 5000'));
 
-process.on('exit', () => session.close());
+// process.on('exit', () => session.close());

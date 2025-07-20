@@ -6,7 +6,8 @@ import {
   listAllTransactionsQuery
 } from '../cyphers/transactionCyphers.js';
 
-export async function createOrUpdateTransaction(session, req, res) {
+export async function createOrUpdateTransaction(driver, req, res) {
+  const session = driver.session();
   const { id, senderId, receiverId, amount, ip, deviceId } = req.body;
   try {
     await session.run(createTransactionQuery, { id, amount, ip, deviceId });
@@ -18,10 +19,14 @@ export async function createOrUpdateTransaction(session, req, res) {
     console.error(err);
     res.status(500).json({ error: 'Error creating transaction' });
   }
+  finally{
+    await session.close();
+  }
 }
 
 
-export async function listAllTransactions(session, req, res) {
+export async function listAllTransactions(driver, req, res) {
+  const session = driver.session();
   try {
     const result = await session.run(listAllTransactionsQuery);
     const transactions = result.records.map(record => {
@@ -40,5 +45,8 @@ export async function listAllTransactions(session, req, res) {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error listing transactions' });
+  }
+  finally{
+    await session.close();
   }
 }
