@@ -48,7 +48,7 @@ This project visualizes user relationships and transaction connections using **N
 
 ```bash
 git clone https://github.com/divyaagrawal261/Flagright-Intern-Task.git
-cd flagright-intern-task
+cd Flagright-Intern-Task
 ```
 
 ### 2. Run the entire stack with Docker Compose
