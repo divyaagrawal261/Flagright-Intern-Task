@@ -2,6 +2,7 @@ import React, {useState} from 'react'
 import Buttons from './Button';
 import { toast } from 'react-toastify';
 import { updateUser } from '../apis/Users';
+import { useNavigate } from 'react-router-dom';
 
 function UserCard({ user }) {
     const [showModal, setShowModal] = useState(false);
@@ -11,6 +12,7 @@ function UserCard({ user }) {
     const [phone, setPhone] = useState(user.phone);
     const [address, setAddress] = useState(user.address);
     const [paymentMethods, setPaymentMethods] = useState(user.payment_methods);
+    const navigate = useNavigate();
 
     const handleUpdate = () => {
         setShowModal(true);
@@ -106,7 +108,10 @@ function UserCard({ user }) {
         <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded' onClick={handleUpdate}>
           Update
         </button>
-        <button className='bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded'>
+        <button
+          className='bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded'
+          onClick={() => navigate(`/relationships/${user.id}`)}
+        >
           Visualize
         </button>
       </div>

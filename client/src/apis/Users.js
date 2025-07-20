@@ -32,7 +32,7 @@ export const listAllUsers = async () =>{
     return response.json();
 }
 
-export const updateUser = async (id, firstName, lastName, email, phone, address, payment_methods) => {
+export const updateUser = async ({id, firstName, lastName, email, phone, address, payment_methods}) => {
     const response = await fetch(`${baseUrl}/users/`, {
         method: 'POST',
         headers: {
@@ -50,5 +50,14 @@ export const updateUser = async (id, firstName, lastName, email, phone, address,
     if (!response.ok) {
         throw new Error('Failed to update user');
     }
+    return response.json();
+}
+
+export const getUserRelations = async ({id}) => {
+    const response = await fetch(`${baseUrl}/relationships/user/${id}`);
+
+    if(!response.ok)
+        throw new Error('Failed to get User Relationships');
+
     return response.json();
 }

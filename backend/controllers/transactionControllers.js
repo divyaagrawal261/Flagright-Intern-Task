@@ -20,10 +20,22 @@ export async function createOrUpdateTransaction(session, req, res) {
   }
 }
 
+
 export async function listAllTransactions(session, req, res) {
   try {
     const result = await session.run(listAllTransactionsQuery);
-    const transactions = result.records.map(record => record.get('t').properties);
+    const transactions = result.records.map(record => {
+      const t = record.get('t').properties;
+      const sender = record.get('sender')?.properties || null;
+      const receiver = record.get('receiver')?.properties || null;
+      const sRel = record.get('sRel')?.type || null;
+      const rRel = record.get('rRel')?.type || null;
+      return {
+        transaction: t,
+        sender,
+        receiver,
+      };
+    });
     res.status(200).json(transactions);
   } catch (err) {
     console.error(err);
